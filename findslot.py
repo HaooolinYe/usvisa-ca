@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 from time import sleep
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -13,18 +14,18 @@ import os
 ########################################
 
 # Your email and password for ais.usvisa-info.com
-USER_EMAIL = "name@gmail.com"
-USER_PASSWORD = "yourpassword"
+USER_EMAIL = "robinyerun@gmail.com"
+USER_PASSWORD = "Rain56752565"
 
 # Use "True" if you want to see Chrome in action, leave as "False" otherwise
-SHOW_GUI = True
+SHOW_GUI = False
 
 # The number of months you would wait 
 # Enter 0 if you only want slots in this month;
 # Enter 1 if you want slots in this month or next month (as early as possible);
 # Enter 2 if you want slots in this month or the next months (as early as possible);
 # And so on
-MAX_WAIT_MONTH = 6
+MAX_WAIT_MONTH = 7
 
 # You are advised to use the default values for the following variables
 # The number of seconds before retry, when there's a slot (but wait time is too long)/when there's no slot
@@ -54,20 +55,28 @@ def attempt(email, pw, wait, slots):
     # Find/type email/password and checkbox
     email_input = driver.find_element(By.NAME, "user[email]")
     email_input.send_keys(email)
+    # sleep(2)
     password_input = driver.find_element(By.NAME, "user[password]")
     password_input.send_keys(pw)
+    # sleep(2)
     checkbox = driver.find_element(By.NAME, "policy_confirmed")
     checkbox.send_keys(" ")
     checkbox.send_keys(Keys.RETURN)
+    sleep(5)
 
     # Land in appointment page, click "Continue"
     continue_link = driver.find_element(By.LINK_TEXT, 'Continue')
     continue_link.click()
-
+    # sleep(2)
     # Jump to appointment dates page
     cur_url = driver.current_url
     appointment_url = cur_url.replace("continue_actions", "appointment")
     driver.get(appointment_url)
+    # sleep(2)
+    select = Select(driver.find_element(By.ID, "appointments_consulate_appointment_facility_id"))
+    select.select_by_value('91')
+    # print("HI")
+    # sleep(2)
 
     # Get appointment date selection box
     driver.implicitly_wait(0.3)
@@ -87,6 +96,7 @@ def attempt(email, pw, wait, slots):
 
     # Check if avalible in current month 
     def cur_month_ava():
+        # start looking from August
         month = driver.find_element(By.XPATH, '/html/body/div[5]/div[1]/table/tbody')
         dates = month.find_elements(By.TAG_NAME, 'td')
         for date in dates:
@@ -120,11 +130,14 @@ def attempt(email, pw, wait, slots):
                 break
         ava_date_btn.click()
 
+        # sleep(2)
         # Select time of the date:
         select_elem = driver.find_element(By.ID, 'appointments_consulate_appointment_time')
         select_elem.click()
+        # sleep(2)
         options = select_elem.find_elements(By.TAG_NAME, 'option')
         options[len(options)-1].click()
+        # sleep(2)
 
         # Click "Reschedule"
         driver.find_element(By.XPATH, '/html/body/div[4]/main/div[4]/div/div/form/div[2]/fieldset/ol/li/input').click()
@@ -135,7 +148,7 @@ def attempt(email, pw, wait, slots):
         finally:
             driver.implicitly_wait(0.05)
             confirm.click()
-        sleep(5)
+        # sleep(5)
         return avalible_in_months
     else:
         driver.close()
@@ -149,17 +162,17 @@ if __name__ == "__main__":
     result = -1
     attempt_count = 0
     while result == -1 or -2 or -3:
-        try:
+        # try:
             # result =:
             # -1 if a slot is found but longer than the user-defined MAX_WAIT_MONTH;
             # -2 if no slot is avalible;
             # -3 if there's an error
             # any positive integer if a slot is booked
-            result = attempt(email=USER_EMAIL, pw=USER_PASSWORD, wait=MAX_WAIT_MONTH, slots=found_slots)
-        except:
-            result = -3
+        result = attempt(email=USER_EMAIL, pw=USER_PASSWORD, wait=MAX_WAIT_MONTH, slots=found_slots)
+        # except:
+        #     result = -3
         attempt_count += 1
-        os.system('clear')
+        # os.system('clear')
         print("Attempt: {}".format(attempt_count))
         if result == -1:
             found_slot_count += 1
