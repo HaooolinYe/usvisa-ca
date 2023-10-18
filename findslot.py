@@ -155,6 +155,10 @@ def attempt(email, pw, wait, slots):
         return -1
 
 if __name__ == "__main__":
+    USER_EMAIL = input("Please enter your email address: ").strip()
+    USER_PASSWORD = input("Please enter your password: ").strip()
+
+
     # Use a dictionary found_slots to record the (nearest avalible month: times_found) pairs
     found_slots = {}
     no_slot_count = 0
